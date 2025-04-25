@@ -11,7 +11,9 @@ description = "Tools to support using data products of various instruments in th
 requires-python = ">=3.11"
 readme = { file = "README.rst", content-type = "text/x-rst" }
 license = { file = "licenses/LICENSE.rst" }
-dependencies = []
+dependencies = [
+    "gammapy>=1.0"
+]
 dynamic = ["version"]
 
 [project.optional-dependencies]
