@@ -5,7 +5,9 @@ Dataset description:
   Source class: Flat Spectrum Radio Quasar
   
   Instrument: Swift-XRT (PC mode)
-  
+
+  Best-fit spectral model: PWL + hydrogen absorption (tbabs)
+
   Reference: https://doi.org/10.1051/0004-6361/202452349
   
 
