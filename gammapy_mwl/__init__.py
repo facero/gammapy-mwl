@@ -1,12 +1,10 @@
+__all__ = ["__version__"]
 
-from .version import version as __version__
-from importlib.metadata import version as _version, PackageNotFoundError
+from importlib.metadata import PackageNotFoundError, version
 
 try:
-    __version__ = _version(__name__)
+    __version__ = version(__name__)
 except PackageNotFoundError:
+    # package is not installed
     pass
 del version, PackageNotFoundError
-
-
-__all__ = []
