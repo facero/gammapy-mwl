@@ -28,9 +28,8 @@ class SherpaSpectralModel(SpectralModel):
     def _wrap_parameters(self):
         parameters = []
         for par in self.sherpa_model.pars:
-            is_norm = par.name in ["ampl", "norm", "K"]
             parameter = Parameter(
-                name=par.name, value=par.val, frozen=par.frozen, is_norm=is_norm
+                name=par.name, value=par.val, frozen=par.frozen
             )
             # TODO: set unit?
             parameters.append(parameter)
