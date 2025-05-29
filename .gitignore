@@ -53,7 +53,7 @@ cover/
 
 # Mac OSX
 .DS_Store
-
+.xw
 .vscode
 .idea
 .settings
