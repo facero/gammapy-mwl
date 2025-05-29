@@ -309,7 +309,15 @@ class StandardOGIPDatasetReader:
             exposure = edisp_kernel.data * u.Unit("cm2") * data["livetime"]
             edisp_kernel.data = 1
 
-        exposure = RegionNDMap(geom=geom_true, data=exposure.value, unit=exposure.unit)
+        # Squeeze singleton dimensions, but keep the correct number of bins
+        exposure_array = np.squeeze(np.asarray(exposure))
+        n_bins = len(energy_true_axis.center)
+        if exposure_array.shape[0] != n_bins:
+            raise ValueError(
+                f"Exposure shape {exposure_array.shape} does not match number of energy bins {n_bins}."
+            )
+        exposure = RegionNDMap(geom=geom_true, data=exposure_array, unit=getattr(exposure, "unit", ""))
+
         edisp = EDispKernelMap.from_edisp_kernel(edisp_kernel, geom=exposure.geom)
 
         #index = np.where(data["grouping"] == 1)[0]
