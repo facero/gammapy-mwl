@@ -1,4 +1,4 @@
-from .models import SherpaSpectralModel
+from .sherpa import SherpaSpectralModel
 
 __all__ = [
     "SherpaSpectralModel",

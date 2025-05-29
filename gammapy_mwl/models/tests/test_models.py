@@ -7,7 +7,7 @@ from gammapy.modeling.models import PowerLawSpectralModel, SkyModel
 
 from sherpa.astro.xspec import XSwabs
 from sherpa.models import PowLaw1D
-from ..models import SherpaSpectralModel
+from gammapy_mwl.models.sherpa import SherpaSpectralModel
 
 
 def test_SherpaSpectralModel():
