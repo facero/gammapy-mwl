@@ -51,6 +51,17 @@ coverage.xml
 .pytest_cache/
 cover/
 
+# Mac OSX
+.DS_Store
+
+.vscode
+.idea
+.settings
+.pydevproject
+.project
+htmlcov
+MANIFEST
+
 # Translations
 *.mo
 *.pot
