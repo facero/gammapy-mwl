@@ -15,11 +15,17 @@ from numpy.testing import assert_allclose
         "data/swift/uvot/sw00036384074uw2_sk.src.pha",
         "data/swift/uvot/sw00036384074uw1_sk.src.pha",
         "data/swift/uvot/sw00036384074um2_sk.src.pha",
+        "data/xmm/mos1/xmm_mos1_0605960101_src.pha",
+        "data/xmm/mos2/xmm_mos2_0605960101_src.pha",
+        "data/xmm/pn/xmm_pn_0605960101_src.pha",
+        # "data/xmm/om/xmm_om_0605960101_src.pha",
+        # "data/fermi/lat/fermi_lat_00036384074_src.pha",
+        # "data/fermi/gbm/fermi_gbm_00036384074_src.pha",
     ]
 )
 def test_standard_ogip_dataset_reader_runs(pha_path):
     """Test that StandardOGIPDatasetReader returns a SpectrumDatasetOnOff for a Swift/XRT or UVOT OGIP PHA file,
-    and that OGIP keywords are read correctly."""
+    and that OGIP keywords and data arrays are read correctly and are not empty or zero."""
     # Suppress Astropy warnings for test
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -35,12 +41,21 @@ def test_standard_ogip_dataset_reader_runs(pha_path):
         reader = StandardOGIPDatasetReader(pha_path)
         dataset = reader.read()
         assert isinstance(dataset, SpectrumDatasetOnOff)
-        assert hasattr(dataset, "counts")
-        assert hasattr(dataset, "acceptance")
-        assert hasattr(dataset, "counts_off")
-        assert hasattr(dataset, "acceptance_off")
-        assert hasattr(dataset, "edisp")
-        assert hasattr(dataset, "exposure")
+
+        # Check attributes exist
+        for attr in ["counts", "acceptance", "counts_off", "acceptance_off", "edisp", "exposure"]:
+            value = getattr(dataset, attr)
+            assert value is not None
+
+        # Check arrays are not empty and do not sum to zero
+        assert dataset.counts.data.size > 0
+        assert dataset.counts_off.data.size > 0
+        assert dataset.acceptance.data.size > 0
+        assert dataset.acceptance_off.data.size > 0
+        assert dataset.counts.data.sum() > 0
+        assert dataset.counts_off.data.sum() > 0
+        assert dataset.acceptance.data.sum() > 0
+        assert dataset.acceptance_off.data.sum() > 0
 
         # Check that the exposure and livetime are read correctly from the dataset metadata
         meta = dataset.meta_table
