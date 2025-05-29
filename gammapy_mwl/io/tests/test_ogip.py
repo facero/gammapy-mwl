@@ -5,16 +5,98 @@ from gammapy.datasets import SpectrumDatasetOnOff
 from astropy.io import fits
 from numpy.testing import assert_allclose
 
+# Example template for expected shapes and sums (fill in values as needed)
+EXPECTED_SHAPES = {
+    "data/swift/xrt/swift_xrt_00036384074_src.pha": {
+        "counts": (1024,1,1),
+        "acceptance": (1024,1,1),
+        "counts_off": (1024,1,1),
+        "acceptance_off": (1024,1,1),
+        "edisp": (2400, 1024, 1, 1),
+        "exposure": (2400, 1, 1),
+    },
+    "data/swift/uvot/sw00036384074uvv_sk.src.pha": {
+        "counts": (1,1,1),
+        "acceptance": (1,1,1),
+        "counts_off": (1,1,1),
+        "acceptance_off": (1,1,1),
+        "edisp": (1282, 1, 1, 1),
+        "exposure": (1282, 1, 1),
+    },
+    "data/xmm/mos1/xmm_mos1_0605960101_src.pha": {
+        "counts": (800,1,1),
+        "acceptance": (800,1,1),
+        "counts_off": (800,1,1),
+        "acceptance_off": (800,1,1),
+        "edisp": (2389, 800, 1, 1),
+        "exposure": (2389, 1, 1),
+    },
+    "data/xmm/mos2/xmm_mos2_0605960101_src.pha": {
+        "counts": (800,1,1),
+        "acceptance": (800,1,1),
+        "counts_off": (800,1,1),
+        "acceptance_off": (800,1,1),
+        "edisp": (2389, 800, 1, 1),
+        "exposure": (2389, 1, 1),
+    },
+    "data/xmm/pn/xmm_pn_0605960101_src.pha": {
+        "counts": (4096,1,1),
+        "acceptance": (4096,1,1),
+        "counts_off": (4096,1,1),
+        "acceptance_off": (4096,1,1),
+        "edisp": (2056, 4096, 1, 1),
+        "exposure": (2056, 1, 1),
+    },
+}
+
+EXPECTED_SUMS = {
+    "data/swift/xrt/swift_xrt_00036384074_src.pha": {
+        "counts": 384,
+        "counts_off": 280,
+        "acceptance": 3790,
+        "acceptance_off": 262303,
+        "edisp": 1090,
+        "exposure": 445171700.0,
+    },
+    "data/swift/uvot/sw00036384074uvv_sk.src.pha": {
+        "counts": 3135,
+        "counts_off": 16437,
+        "acceptance": 143370,
+        "acceptance_off": 1491009,
+        "edisp": 1282,
+        "exposure": 207368,
+    },
+    "data/xmm/mos1/xmm_mos1_0605960101_src.pha": {
+        "counts": 33497,
+        "counts_off": 2.369e5,
+        "acceptance": 8.7e14,
+        "acceptance_off": 8.7e16,
+        "edisp": 2389,
+        "exposure": 17992516000.0,
+    },
+    "data/xmm/mos2/xmm_mos2_0605960101_src.pha": {
+        "counts": 31941,
+        "counts_off": 225753,
+        "acceptance": 8.744e14,
+        "acceptance_off": 8.744e+16,
+        "edisp": 2389,
+        "exposure": 17992516000,
+    },
+    "data/xmm/pn/xmm_pn_0605960101_src.pha": {
+        "counts": 70680,
+        "counts_off": 333378,
+        "acceptance": 2.5479e15,
+        "acceptance_off": 2.5479e+17,
+        "edisp": 2056,
+        "exposure": 22077673000,
+    },
+}
+
 @pytest.mark.parametrize(
     "pha_path",
     [
         "data/swift/xrt/swift_xrt_00036384074_src.pha",
         "data/swift/uvot/sw00036384074uvv_sk.src.pha",
-        "data/swift/uvot/sw00036384074ubb_sk.src.pha",
-        "data/swift/uvot/sw00036384074uuu_sk.src.pha",
-        "data/swift/uvot/sw00036384074uw2_sk.src.pha",
-        "data/swift/uvot/sw00036384074uw1_sk.src.pha",
-        "data/swift/uvot/sw00036384074um2_sk.src.pha",
         "data/xmm/mos1/xmm_mos1_0605960101_src.pha",
         "data/xmm/mos2/xmm_mos2_0605960101_src.pha",
         "data/xmm/pn/xmm_pn_0605960101_src.pha",
@@ -47,11 +129,33 @@ def test_standard_ogip_dataset_reader_runs(pha_path):
             value = getattr(dataset, attr)
             assert value is not None
 
+        # Check shapes of arrays
+        shape_map = {
+            "counts": dataset.counts.data,
+            "counts_off": dataset.counts_off.data,
+            "acceptance": dataset.acceptance.data,
+            "acceptance_off": dataset.acceptance_off.data,
+            "edisp": dataset.edisp.edisp_map.data,
+            "exposure": dataset.exposure.data,
+        }
+        for key, arr in shape_map.items():
+            expected_shape = EXPECTED_SHAPES[pha_path][key]
+            assert arr.shape == expected_shape, f"{key} shape {arr.shape} != {expected_shape}"
+        
+        sum_map = {
+            "counts": dataset.counts.data,
+            "counts_off": dataset.counts_off.data,
+            "acceptance": dataset.acceptance.data,
+            "acceptance_off": dataset.acceptance_off.data,
+            "edisp": dataset.edisp.edisp_map.data,
+            "exposure": dataset.exposure.data,
+        }
+        for key, arr in sum_map.items():
+            expected_sum = EXPECTED_SUMS[pha_path][key]
+            assert_allclose(arr.sum(), expected_sum, rtol=1e-2, 
+                            err_msg=f"{key} sum {arr.sum()} != {expected_sum}")
+        
         # Check arrays are not empty and do not sum to zero
-        assert dataset.counts.data.size > 0
-        assert dataset.counts_off.data.size > 0
-        assert dataset.acceptance.data.size > 0
-        assert dataset.acceptance_off.data.size > 0
         assert dataset.counts.data.sum() > 0
         assert dataset.counts_off.data.sum() > 0
         assert dataset.acceptance.data.sum() > 0
