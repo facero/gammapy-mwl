@@ -104,7 +104,7 @@ class StandardOGIPDatasetReader:
         self.gti_hdu = gti_hdu
 
     def get_valid_path(self, filename):
-        """Resolve a file path, relative to the reference file if needed.
+        """Resolve a file path relative to the PHA file location.
 
         Parameters
         ----------
@@ -117,12 +117,16 @@ class StandardOGIPDatasetReader:
             Absolute path to the file.
         """
         filename = make_path(filename)
-        if not filename.exists():
+        # Always resolve relative to the PHA file's directory
+        if not filename.is_absolute():
             return self.filename.parent / filename
+        # If absolute, check if it exists, else try relative
+        if not filename.exists():
+            return self.filename.parent / filename.name
         return filename
 
     def get_filenames(self, pha_meta):
-        """Extract related file names from PHA metadata.
+        """Extract related file names from PHA metadata, resolving them relative to the PHA file.
 
         Parameters
         ----------
@@ -134,7 +138,9 @@ class StandardOGIPDatasetReader:
         filenames : dict
             Dictionary with keys "arffile", "rmffile" (optional), and "bkgfile" (optional).
         """
-        filenames = {"arffile": self.get_valid_path(pha_meta["ANCRFILE"])}
+        filenames = {}
+        if "ANCRFILE" in pha_meta:
+            filenames["arffile"] = self.get_valid_path(pha_meta["ANCRFILE"])
         if "BACKFILE" in pha_meta:
             filenames["bkgfile"] = self.get_valid_path(pha_meta["BACKFILE"])
         if "RESPFILE" in pha_meta:

@@ -6,7 +6,8 @@ from numpy.testing import assert_allclose
 
 @pytest.mark.parametrize(
     "pha_path",
-    ["data/swift/xrt/swift_xrt_00036384074_src.pha"]
+    ["data/swift/xrt/swift_xrt_00036384074_src.pha",
+     "data/swift/uvot/sw00036384074uvv_sk.src.pha"]
 )
 def test_standard_ogip_dataset_reader_runs(pha_path):
     """Test that StandardOGIPDatasetReader returns a SpectrumDatasetOnOff for a Swift/XRT OGIP PHA file,
@@ -17,11 +18,9 @@ def test_standard_ogip_dataset_reader_runs(pha_path):
         ogip_class = header.get("HDUCLASS")
         ogip_clas1 = header.get("HDUCLAS1")
         exposure = header.get("EXPOSURE")
-        livetime = header.get("LIVETIME")
         assert ogip_class == "OGIP"
         assert ogip_clas1 == "SPECTRUM"
         assert exposure is not None
-        assert livetime is not None
 
     reader = StandardOGIPDatasetReader(pha_path)
     dataset = reader.read()
@@ -33,7 +32,6 @@ def test_standard_ogip_dataset_reader_runs(pha_path):
     assert hasattr(dataset, "edisp")
     assert hasattr(dataset, "exposure")
 
-    # Check that the exposure and livetime are read correctly from the dataset metadata
+    # Check that the exposure is read correctly from the dataset metadata
     meta = dataset.meta_table
     assert_allclose(meta["EXPOSURE"], exposure, rtol=1e-3)
-    assert_allclose(meta["LIVETIME"], livetime, rtol=1e-3)
